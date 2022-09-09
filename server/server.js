@@ -7,6 +7,7 @@ const bodyParser = require('body-parser')
 const mongoose = require("mongoose");
 
 const todoRouter = require("./routes/getToDos");
+
 const toDoModel = require("./models/todoModel");
 
 mongoose.connect(process.env.DB_CONNECTION_STRING)
@@ -24,30 +25,41 @@ app.get('/', (request, response)=>{
     response.send(`Hello World / ${today}`)
 })
 
-const seedDatabase = async(res,req) =>{
+app.get('/todos', async (req, res) => {
+    const { toDoDescription } = req.query; // from the user
+    // use the findOne() method
+    const allTODO = await toDoModel.findOne({ toDoDescription: toDoDescription }); // if empty, gets all employees
+
+    res.status(200).send(allTODO);
+})
+
+app.post('/new-todo', async (req, res) => {
     try {
-    let toDo1 = new toDoModel({
-        toDoDescription: 'vacuum carpets',
-        dueDate: 'Thursday'
-    })
-    let toDo2 = new toDoModel({
-        toDoDescription: 'wash work clothes',
-        dueDate: 'Saturday'
-    })
-    let toDo3 = new toDoModel({
-        toDoDescription: 'study',
-        dueDate: 'Monday'
-    })
-    await toDo1.save();
-    await toDo2.save();
-    await toDo3.save();
+      
+        const newToDo = await toDoModel.create(req.body); 
+        res.send(`To Do sucessfully Created : ${newToDo}`);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error creating Employee');
+    }
+})
+
+app.delete('/todos/:id', async (req, res) => {
+    const id = req.params.id; // From the client
+
+    try {
+
+        await toDoModel.findByIdAndDelete(id); // thos does ALL the work for me. yay!
+
+        // We don't need to send any data, but we do need a success message
+        res.send('Item Deleted');
 
     } catch (error) {
-        console.log(error)
+        console.error(error);
+        res.status(404).send('Error occured. Try again.')
     }
-}
 
-seedDatabase();
+})
 
 app.use(todoRouter)
 

@@ -1,10 +1,10 @@
 import React, { Component } from 'react'
 
-export default class Main extends Component {
+export default class About extends Component {
   render() {
     return (
       <div style = {{display: 'grid', justifyContent: "center"}}>
-        <h1>Main Page</h1>
+        <h1>About</h1>
       </div>
     )
   }
